@@ -1,73 +1,23 @@
 import streamlit as st
+import requests
 
-st.set_page_config(page_title="나와 어울리는 영화는?", page_icon="🎬", layout="centered")
+st.title("🎬 TMDB API 테스트")
 
-st.title("🎬 나와 어울리는 영화는?")
-st.write("대학생 감성에 맞춘 5문항 심리테스트! 😄 가장 끌리는 선택지를 골라보세요. (결과 분석은 다음 단계에서 연결할게요)")
+# 사이드바에서 API 키 입력
+TMDB_API_KEY = st.sidebar.text_input("TMDB API Key", type="password")
 
-st.divider()
-
-questions = [
-    {
-        "q": "1. 오랜만에 하루가 통째로 비는 날, 가장 하고 싶은 건?",
-        "options": [
-            "A. 좋아하는 음악 틀어놓고 카페나 산책하면서 생각 정리하기 (로맨스/드라마)",
-            "B. 즉흥으로 여행 떠나거나 새로운 액티비티 도전하기 (액션/어드벤처)",
-            "C. 밤새 세계관 있는 영화·드라마 정주행하기 (SF/판타지)",
-            "D. 친구들이랑 모여서 웃긴 영상이나 예능 보기 (코미디)",
-        ],
-    },
-    {
-        "q": "2. 시험이 끝난 날, 나의 기분은?",
-        "options": [
-            "A. “고생했다 나 자신…” 감정이 몰려와서 괜히 센치해진다 (로맨스/드라마)",
-            "B. 해방감 MAX! 뭐든지 할 수 있을 것 같다 (액션/어드벤처)",
-            "C. 이제야 현실로 돌아온 느낌… 아직도 머리는 딴 데 가 있음 (SF/판타지)",
-            "D. 드디어 밈 돌려보고 썰 풀 시간이다 (코미디)",
-        ],
-    },
-    {
-        "q": "3. 처음 만난 사람과 빨리 친해지는 방법은?",
-        "options": [
-            "A. 진지한 얘기하다가 공감대 생기기 (로맨스/드라마)",
-            "B. 같이 뭔가 해보면서 자연스럽게 친해지기 (액션/어드벤처)",
-            "C. 취향·덕질 얘기로 깊게 파고들기 (SF/판타지)",
-            "D. 농담 주고받다가 웃음 터지면서 친해지기 (코미디)",
-        ],
-    },
-    {
-        "q": "4. 과제하다가 현실 도피하고 싶을 때 드는 생각은?",
-        "options": [
-            "A. “이 시기 지나면 좀 더 괜찮아지겠지…” (로맨스/드라마)",
-            "B. “다 때려치우고 어디론가 떠나고 싶다” (액션/어드벤처)",
-            "C. “이건 내가 있는 세계선이 잘못된 게 분명해” (SF/판타지)",
-            "D. “이 상황 자체가 너무 웃기다ㅋㅋ” (코미디)",
-        ],
-    },
-    {
-        "q": "5. 영화 속 주인공이 된다면 가장 끌리는 설정은?",
-        "options": [
-            "A. 관계와 감정의 변화를 섬세하게 겪는 인물 (로맨스/드라마)",
-            "B. 위기 속에서 선택을 거듭하며 성장하는 인물 (액션/어드벤처)",
-            "C. 다른 세계나 규칙을 마주한 특별한 존재 (SF/판타지)",
-            "D. 사건 사고의 중심에서 분위기 메이커 역할 (코미디)",
-        ],
-    },
-]
-
-answers = {}
-
-for idx, item in enumerate(questions, start=1):
-    answers[idx] = st.radio(
-        item["q"],
-        item["options"],
-        index=None,  # 선택 전에는 아무것도 선택되지 않도록
-        key=f"q{idx}",
-    )
-    st.write("")  # 질문 간 간격
-
-st.divider()
-
-if st.button("결과 보기", type="primary"):
-    # 아직 분석 로직/연동은 안 하고, 버튼 클릭 시 문구만 출력
-    st.subheader("분석 중...")
+if TMDB_API_KEY:
+    if st.button("인기 영화 가져오기"):
+        # TMDB에서 인기 영화 가져오기
+        url = f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}&language=ko-KR"
+        response = requests.get(url)
+        data = response.json()
+        
+        # 첫 번째 영화 정보 출력
+        movie = data['results'][0]
+        st.write(f"🎬 제목: {movie['title']}")
+        st.write(f"⭐ 평점: {movie['vote_average']}/10")
+        st.write(f"📅 개봉일: {movie['release_date']}")
+        st.write(f"📝 줄거리: {movie['overview'][:100]}...")
+else:
+    st.info("사이드바에 TMDB API Key를 입력해주세요.")
